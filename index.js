@@ -1,12 +1,9 @@
-
-const Koa        = require('koa')
-const Router     = require('@koa/router')
+const Koa = require('koa')
+const Router = require('@koa/router')
 const bodyParser = require('koa-bodyparser')
 const logger = require('koa-logger')
-// const crypto     = require('crypto');
-const cors       = require('@koa/cors')
+const cors = require('@koa/cors')
 const { SDK_KEY_HEADER } = require('./constants')
-
 const featureFlags = require('./routes/featureFlags')
 const dataFiles = require('./routes/dataFiles')
 
@@ -30,8 +27,13 @@ app.use(async (ctx, next) => {
 /**
  * Give a generic message for a request to /
  */
-router.get("/", async function (ctx) {
-  ctx.body = { data: { message: 'Welcome to the optimizely feature flag api microservice. Create a full stack account and some feature flags to start using me.' } }
+router.get('/', async function (ctx) {
+  ctx.body = {
+    data: {
+      message:
+        'Welcome to the optimizely feature flag api microservice. Create a full stack account and some feature flags to start using me.'
+    }
+  }
 })
 
 /**

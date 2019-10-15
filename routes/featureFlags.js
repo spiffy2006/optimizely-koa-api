@@ -8,14 +8,14 @@ const router = new Router({
 })
 
 // get all feature flags matching the sdk key
-router.get("/", async function (ctx) {
+router.get('/', async function (ctx) {
   const optimizely = getClient(ctx.request.headers[SDK_KEY_HEADER])
   const featureFlags = await optimizely.getFeatureFlagsList()
   ctx.body = { data: { featureFlags } }
 })
 
 // get a map of enabled and disabled features for a user
-router.get("/:user_id", async function (ctx) {
+router.get('/:user_id', async function (ctx) {
   const optimizely = getClient(ctx.request.headers[SDK_KEY_HEADER])
   const enabled = await optimizely.getFeatureFlagsEnabled(
     ctx.params.user_id,
@@ -26,7 +26,7 @@ router.get("/:user_id", async function (ctx) {
 })
 
 // get whether a specific feature is enabled
-router.get("/:user_id", async function (ctx  ) {
+router.get('/:user_id', async function (ctx) {
   const optimizely = getClient(ctx.request.headers[SDK_KEY_HEADER])
   const enabled = await optimizely.isFeatureEnabled(
     ctx.params.feature,

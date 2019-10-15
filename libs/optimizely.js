@@ -1,6 +1,7 @@
-const optimizelySDK = require('@optimizely/optimizely-sdk');
+const optimizelySDK = require('@optimizely/optimizely-sdk')
 const NodeCache = require('node-cache')
 const fetch = require('node-fetch')
+
 const cache = new NodeCache()
 const cdnUrl = 'https://cdn.optimizely.com'
 
@@ -8,7 +9,7 @@ optimizelySDK.setLogLevel('info')
 optimizelySDK.setLogger(optimizelySDK.logging.createLogger())
 
 // keep the instances being used in memory so we aren't reinstantiating them
-let instances = {}
+const instances = {}
 
 /**
  * Optimizely class for doing all the logic things
@@ -33,7 +34,7 @@ class Optimizely {
       sdkKey: this.sdkKey,
       datafileOptions: {
         autoUpdate: true,
-        updateInterval: 1000,  // 1 second in milliseconds
+        updateInterval: 1000 // 1 second in milliseconds
       }
     })
   }
@@ -57,11 +58,15 @@ class Optimizely {
    *
    * @return {Object}
    */
-  async getFeatureFlagsEnabled (userId,  attributes = {}) {
+  async getFeatureFlagsEnabled (userId, attributes = {}) {
     const featureFlags = await this.getFeatureFlagsList()
-    let enabled = {}
+    const enabled = {}
     for (var i = 0; i < featureFlags.length; i++) {
-      enabled[featureFlags[i]] = await this.isFeatureEnabled(featureFlags[i], userId, attributes)
+      enabled[featureFlags[i]] = await this.isFeatureEnabled(
+        featureFlags[i],
+        userId,
+        attributes
+      )
     }
     return enabled
   }
@@ -72,7 +77,7 @@ class Optimizely {
    * @return {Promise}
    */
   async clientReady () {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       this.client.onReady(() => {
         resolve()
       })
@@ -123,11 +128,11 @@ class Optimizely {
    * @return {Object}
    */
   async validateAttributes (attributes) {
-    let datafile = await this.getParsedDataFile()
+    const datafile = await this.getParsedDataFile()
     if (!datafile.attributes || datafile.attributes.length === 0) {
       return {}
     }
-    let validated = {}
+    const validated = {}
     datafile.attributes.forEach(attr => {
       if (attributes[attr.key]) {
         validated[attr.key] = attributes[attr.key]
@@ -182,8 +187,7 @@ class Optimizely {
   }
 }
 
-
-module.exports = function(sdkKey) {
+module.exports = function (sdkKey) {
   if (instances[sdkKey]) {
     return instances[sdkKey]
   } else {
