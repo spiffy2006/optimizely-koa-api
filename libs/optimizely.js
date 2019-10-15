@@ -4,10 +4,15 @@ const fetch = require('node-fetch')
 const cache = new NodeCache()
 const cdnUrl = 'https://cdn.optimizely.com'
 
-optimizelySDK.setLogLevel('info');
+optimizelySDK.setLogLevel('info')
 optimizelySDK.setLogger(optimizelySDK.logging.createLogger())
+
+// keep the instances being used in memory so we aren't reinstantiating them
 let instances = {}
 
+/**
+ * Optimizely class for doing all the logic things
+ */
 class Optimizely {
   constructor (sdkKey) {
     this.sdkKey = sdkKey
@@ -16,6 +21,11 @@ class Optimizely {
     this.datafile = null // raw json datafile
   }
 
+  /**
+   * creates an instance of the optimizely-sdk
+   *
+   * @return {OptimizelySDK}
+   */
   async createClient () {
     const datafile = await this.getDataFile()
     return optimizelySDK.createInstance({
@@ -28,6 +38,11 @@ class Optimizely {
     })
   }
 
+  /**
+   * Gets all of the feature flags in the datafile
+   *
+   * @return {Array}
+   */
   async getFeatureFlagsList () {
     const datafile = await this.getParsedDataFile()
     if (datafile.featureFlags && datafile.featureFlags.length > 0) {
@@ -35,6 +50,13 @@ class Optimizely {
     }
   }
 
+  /**
+   * Gets a map of all enabled and disabled features for a user
+   * @param {string} userId
+   * @param {Object} attributes
+   *
+   * @return {Object}
+   */
   async getFeatureFlagsEnabled (userId,  attributes = {}) {
     const featureFlags = await this.getFeatureFlagsList()
     let enabled = {}
@@ -44,14 +66,24 @@ class Optimizely {
     return enabled
   }
 
+  /**
+   * Waits for the optimizely client to be ready
+   *
+   * @return {Promise}
+   */
   async clientReady () {
-    new Promise((resolve) => {
+    return new Promise((resolve) => {
       this.client.onReady(() => {
         resolve()
       })
     })
   }
 
+  /**
+   * A wrapper for getting the client to make sure there is always an instance
+   *
+   * @return {OptimizelySDK}
+   */
   async getClient () {
     if (this.client !== null) {
       return this.client
@@ -62,6 +94,11 @@ class Optimizely {
     }
   }
 
+  /**
+   * Parsed the json datafile into an actual object
+   *
+   * @return {Object}
+   */
   async getParsedDataFile () {
     if (this.parsed !== null) {
       return this.parsed
@@ -78,6 +115,13 @@ class Optimizely {
     return this.parsed
   }
 
+  /**
+   * Validates the attributes given against the attributes defined in the datafile
+   *  and returns only attributes that are defined in the datafile
+   * @param {Object} attributes
+   *
+   * @return {Object}
+   */
   async validateAttributes (attributes) {
     let datafile = await this.getParsedDataFile()
     if (!datafile.attributes || datafile.attributes.length === 0) {
@@ -92,12 +136,25 @@ class Optimizely {
     return validated
   }
 
+  /**
+   * Returns whether a feature is enabled
+   * @param {String} feature
+   * @param {String} userId
+   * @param {Object} attributes
+   *
+   * @return {boolean}
+   */
   async isFeatureEnabled (feature, userId, attributes = {}) {
     const client = await this.getClient()
     const attrs = await this.validateAttributes(attributes)
     return client.isFeatureEnabled(feature, userId, attrs)
   }
 
+  /**
+   * Caches the current datafile on the optimizely cdn
+   *
+   * @return {String}
+   */
   async cacheDataFile () {
     const response = await fetch(`${cdnUrl}/datafiles/${this.sdkKey}.json`)
     const dataFile = await response.json()
@@ -108,6 +165,11 @@ class Optimizely {
     return dataFile
   }
 
+  /**
+   * Gets the cached datafile
+   *
+   * @return {String}
+   */
   async getDataFile () {
     if (this.datafile !== null) {
       return this.datafile
