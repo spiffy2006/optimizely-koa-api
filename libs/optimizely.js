@@ -11,17 +11,75 @@ let instances = {}
 class Optimizely {
   constructor (sdkKey) {
     this.sdkKey = sdkKey
-    this.client = optimizelySDK.createInstance({
-      sdkKey: sdkKey,
+    this.client = null
+    this.parsed = null // parsed data file
+    this.datafile = null // raw json datafile
+  }
+
+  async createClient () {
+    const datafile = await this.getDataFile()
+    return optimizelySDK.createInstance({
+      datafile,
+      sdkKey: this.sdkKey,
       datafileOptions: {
         autoUpdate: true,
         updateInterval: 1000,  // 1 second in milliseconds
-      },
-    });
+      }
+    })
   }
 
-  isFeatureEnabled (feature, userId) {
-    return this.client.isFeatureEnabled(feature, userId)
+  async clientReady () {
+    new Promise((resolve) => {
+      this.client.onReady(() => {
+        resolve()
+      })
+    })
+  }
+
+  async getClient () {
+    if (this.client !== null) {
+      return this.client
+    } else {
+      this.client = await this.createClient()
+      await this.clientReady()
+      return this.client
+    }
+  }
+
+  async getParsedDataFile () {
+    if (this.parsed !== null) {
+      return this.parsed
+    }
+    const file = await this.getDataFile()
+    let data = null
+    try {
+      data = JSON.parse(file)
+    } catch (e) {
+      // I guess it is already parsed?
+      data = file
+    }
+    this.parsed = data
+    return this.parsed
+  }
+
+  async validateAttributes (attributes) {
+    let datafile = await this.getParsedDataFile()
+    if (!datafile.attributes || datafile.attributes.length === 0) {
+      return {}
+    }
+    let validated = {}
+    datafile.attributes.forEach(attr => {
+      if (attributes[attr.key]) {
+        validated[attr.key] = attributes[attr.key]
+      }
+    })
+    return validated
+  }
+
+  async isFeatureEnabled (feature, userId, attributes = {}) {
+    const client = await this.getClient()
+    const attrs = await this.validateAttributes(attributes)
+    return client.isFeatureEnabled(feature, userId, attrs)
   }
 
   async cacheDataFile () {
@@ -34,12 +92,15 @@ class Optimizely {
     return dataFile
   }
 
-  getDataFile () {
-    const dataFile = cache.get(this.sdkKey)
-    if (dataFile === undefined) {
-      return null
+  async getDataFile () {
+    if (this.datafile !== null) {
+      return this.datafile
     }
-    return dataFile
+    this.datafile = cache.get(this.sdkKey)
+    if (this.datafile === undefined) {
+      this.datafile = await this.cacheDataFile()
+    }
+    return this.datafile
   }
 }
 
