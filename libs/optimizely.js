@@ -25,8 +25,8 @@ class Optimizely {
   }
 
   async cacheDataFile () {
-    const response = await fetch(`${cdnUrl}/datafiles/${this.sdkKeyy}.json`)
-    const dataFile = await response.text()
+    const response = await fetch(`${cdnUrl}/datafiles/${this.sdkKey}.json`)
+    const dataFile = await response.json()
     if (!dataFile) {
       return null
     }
