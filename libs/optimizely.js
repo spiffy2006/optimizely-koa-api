@@ -28,6 +28,22 @@ class Optimizely {
     })
   }
 
+  async getFeatureFlagsList () {
+    const datafile = await this.getParsedDataFile()
+    if (datafile.featureFlags && datafile.featureFlags.length > 0) {
+      return datafile.featureFlags.map(ff => ff.key)
+    }
+  }
+
+  async getFeatureFlagsEnabled (userId,  attributes = {}) {
+    const featureFlags = await this.getFeatureFlagsList()
+    let enabled = {}
+    for (var i = 0; i < featureFlags.length; i++) {
+      enabled[featureFlags[i]] = await this.isFeatureEnabled(featureFlags[i], userId, attributes)
+    }
+    return enabled
+  }
+
   async clientReady () {
     new Promise((resolve) => {
       this.client.onReady(() => {

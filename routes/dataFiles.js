@@ -1,12 +1,13 @@
 const getClient = require('../libs/optimizely')
-const Router = require('@koa/router');
+const Router = require('@koa/router')
+const { SDK_KEY_HEADER } = require('../constants')
 const router = new Router({
   prefix: '/dataFiles'
 });
 
-router.post("/:sdk_key", async function (ctx) {
+router.post("/", async function (ctx) {
   // grab data file from optimizely and cache it
-  const optimizely = getClient(ctx.params.sdk_key)
+  const optimizely = getClient(ctx.request.headers[SDK_KEY_HEADER])
   const dataFile = await optimizely.cacheDataFile()
   if (!dataFile) {
     ctx.body = {errors: 'Invalid SDK Key provided'}
@@ -17,9 +18,9 @@ router.post("/:sdk_key", async function (ctx) {
   ctx.status = 201
 });
 
-router.get("/:sdk_key", async function (ctx) {
-  const optimizely = getClient(ctx.params.sdk_key)
-  const file = optimizely.getDataFile()
+router.get("/", async function (ctx) {
+  const optimizely = getClient(ctx.request.headers[SDK_KEY_HEADER])
+  const file = await optimizely.getDataFile()
   if (!file) {
     ctx.body = {errors: 'Unable to retrieve data file'}
     ctx.status = 400
