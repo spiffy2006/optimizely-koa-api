@@ -45,6 +45,7 @@ class Optimizely {
    * @return {Array}
    */
   async getFeatureFlagsList () {
+    console.log('before getParsedDataFile')
     const datafile = await this.getParsedDataFile()
     if (datafile.featureFlags && datafile.featureFlags.length > 0) {
       return datafile.featureFlags.map(ff => ff.key)
@@ -59,8 +60,10 @@ class Optimizely {
    * @return {Object}
    */
   async getFeatureFlagsEnabled (userId, attributes = {}) {
+    console.log('before getFeatureFlagsList')
     const featureFlags = await this.getFeatureFlagsList()
     const enabled = {}
+    console.log('before isEnabledLoop')
     for (var i = 0; i < featureFlags.length; i++) {
       enabled[featureFlags[i]] = await this.isFeatureEnabled(
         featureFlags[i],
@@ -69,19 +72,6 @@ class Optimizely {
       )
     }
     return enabled
-  }
-
-  /**
-   * Waits for the optimizely client to be ready
-   *
-   * @return {Promise}
-   */
-  async clientReady () {
-    return new Promise(resolve => {
-      this.client.onReady(() => {
-        resolve()
-      })
-    })
   }
 
   /**
@@ -94,7 +84,6 @@ class Optimizely {
       return this.client
     } else {
       this.client = await this.createClient()
-      await this.clientReady()
       return this.client
     }
   }
@@ -108,6 +97,7 @@ class Optimizely {
     if (this.parsed !== null) {
       return this.parsed
     }
+    console.log('before getDataFile')
     const file = await this.getDataFile()
     let data = null
     try {
@@ -150,8 +140,11 @@ class Optimizely {
    * @return {boolean}
    */
   async isFeatureEnabled (feature, userId, attributes = {}) {
+    console.log('before getClient')
     const client = await this.getClient()
+    console.log('before validate')
     const attrs = await this.validateAttributes(attributes)
+    console.log('before isFeatureEnabled')
     return client.isFeatureEnabled(feature, userId, attrs)
   }
 
