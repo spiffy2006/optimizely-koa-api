@@ -1,7 +1,6 @@
 const Router = require('@koa/router')
 const getClient = require('../libs/optimizely')
 const { SDK_KEY_HEADER } = require('../constants')
-const response = require('../json-api/response')
 
 // makes all requests in this router instance start at /featureFlags
 const router = new Router({
@@ -12,7 +11,7 @@ const router = new Router({
 router.get('/', async function (ctx) {
   const optimizely = getClient(ctx.request.headers[SDK_KEY_HEADER])
   const featureFlags = await optimizely.getFeatureFlagsList()
-  response.body = { featureFlags }
+  ctx.state.response.body = { featureFlags }
 })
 
 // get a map of enabled and disabled features for a user
@@ -22,7 +21,7 @@ router.get('/:user_id', async function (ctx) {
     ctx.params.user_id,
     ctx.query
   )
-  response.body = { enabled }
+  ctx.state.response.body = { enabled }
 })
 
 // get whether a specific feature is enabled
@@ -34,7 +33,7 @@ router.get('/:user_id/:feature', async function (ctx) {
     ctx.query
   )
 
-  response.body = { enabled }
+  ctx.state.response.body = { enabled }
 })
 
 module.exports = router

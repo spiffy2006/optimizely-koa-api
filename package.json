@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npm test",
-    "watch:dev": "nodemon index.js"
+    "watch:dev": "nodemon api/index.js"
   },
   "author": "",
   "license": "ISC",

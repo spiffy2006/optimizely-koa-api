@@ -1,7 +1,7 @@
 /**
  * A class to handle responses and format them in JSON API format
  */
-class JsonApiResponse {
+module.exports = class JsonApiResponse {
   constructor () {
     this.errors = []
     this.body = null
@@ -27,6 +27,3 @@ class JsonApiResponse {
     }
   }
 }
-
-// creates a singleton instance to use throughout api
-module.exports = new JsonApiResponse()
