@@ -26,7 +26,7 @@ router.get('/:user_id', async function (ctx) {
 })
 
 // get whether a specific feature is enabled
-router.get('/:user_id', async function (ctx) {
+router.get('/:user_id/:feature', async function (ctx) {
   const optimizely = getClient(ctx.request.headers[SDK_KEY_HEADER])
   const enabled = await optimizely.isFeatureEnabled(
     ctx.params.feature,
