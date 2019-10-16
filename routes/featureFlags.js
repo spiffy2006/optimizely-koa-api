@@ -18,12 +18,10 @@ router.get('/', async function (ctx) {
 // get a map of enabled and disabled features for a user
 router.get('/:user_id', async function (ctx) {
   const optimizely = getClient(ctx.request.headers[SDK_KEY_HEADER])
-  console.log('client initialized')
   const enabled = await optimizely.getFeatureFlagsEnabled(
     ctx.params.user_id,
     ctx.query
   )
-  console.log('after enabled check')
   response.body = { enabled }
 })
 

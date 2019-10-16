@@ -6,7 +6,6 @@ const response = require('./response')
  * https://jsonapi.org/format/
  */
 module.exports = () => async (ctx, next) => {
-  console.log('*** HEADERS ***', ctx.request.headers)
   if (ctx.request.headers['content-type'] !== JSONAPI_CONTENT_TYPE) {
     response.addError(`Content-Type must be ${JSONAPI_CONTENT_TYPE}`)
     ctx.status = 400
