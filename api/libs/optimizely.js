@@ -5,7 +5,7 @@ const fetch = require('node-fetch')
 const cache = new NodeCache()
 const cdnUrl = 'https://cdn.optimizely.com'
 
-optimizelySDK.setLogLevel('info')
+// optimizelySDK.setLogLevel('info')
 optimizelySDK.setLogger(optimizelySDK.logging.createLogger())
 
 // keep the instances being used in memory so we aren't reinstantiating them
