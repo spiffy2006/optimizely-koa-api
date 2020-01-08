@@ -8,13 +8,10 @@ const cdnUrl = 'https://cdn.optimizely.com'
 // optimizelySDK.setLogLevel('info')
 optimizelySDK.setLogger(optimizelySDK.logging.createLogger())
 
-// keep the instances being used in memory so we aren't reinstantiating them
-const instances = {}
-
 /**
  * Optimizely class for doing all the logic things
  */
-class Optimizely {
+module.exports = class Optimizely {
   constructor (sdkKey) {
     this.sdkKey = sdkKey
     this.client = null
@@ -170,13 +167,5 @@ class Optimizely {
       this.datafile = await this.cacheDataFile()
     }
     return this.datafile
-  }
-}
-
-module.exports = function (sdkKey) {
-  if (instances[sdkKey]) {
-    return instances[sdkKey]
-  } else {
-    return new Optimizely(sdkKey)
   }
 }
