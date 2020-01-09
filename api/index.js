@@ -7,7 +7,7 @@ const { SDK_KEY_HEADER } = require('./constants')
 const featureFlags = require('./routes/featureFlags')
 const dataFiles = require('./routes/dataFiles')
 const jsonapi = require('./json-api')
-
+const Optimizely = require('./libs/optimizely')
 const app = new Koa()
 const router = new Router()
 app.use(bodyParser())
@@ -25,6 +25,17 @@ app.use(async (ctx, next) => {
     ctx.state.response.addError('request missing sdk key')
     ctx.body = ctx.state.response.getResponse()
     return
+  }
+  await next()
+})
+
+app.context.optimizelyInstances = {}
+app.use(async (ctx, next) => {
+  const sdkKey = ctx.request.headers[SDK_KEY_HEADER]
+  if (!ctx.optimizelyInstances[sdkKey]) {
+    console.log('new instance created ' + sdkKey)
+    console.log(app.context.optimizelyInstances)
+    app.context.optimizelyInstances[sdkKey] = new Optimizely(sdkKey)
   }
   await next()
 })

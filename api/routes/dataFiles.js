@@ -1,4 +1,3 @@
-const getClient = require('../libs/optimizely')
 const Router = require('@koa/router')
 const { SDK_KEY_HEADER } = require('../constants')
 
@@ -9,7 +8,8 @@ const router = new Router({
 
 // post to update and cache the latest version of the datafile
 router.post('/', async function (ctx) {
-  const optimizely = getClient(ctx.request.headers[SDK_KEY_HEADER])
+  const optimizely =
+    ctx.optimizelyInstances[ctx.request.headers[SDK_KEY_HEADER]]
   const dataFile = await optimizely.cacheDataFile()
   if (!dataFile) {
     ctx.state.response.addError('Unable to update datafile')
@@ -22,7 +22,8 @@ router.post('/', async function (ctx) {
 
 // get the currently cached datafile
 router.get('/', async function (ctx) {
-  const optimizely = getClient(ctx.request.headers[SDK_KEY_HEADER])
+  const optimizely =
+    ctx.optimizelyInstances[ctx.request.headers[SDK_KEY_HEADER]]
   const file = await optimizely.getDataFile()
   if (!file) {
     ctx.state.response.addError('Unable to retrieve data file')
