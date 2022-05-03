@@ -1,22 +1,22 @@
-const optimizelySDK = require('@optimizely/optimizely-sdk')
-const NodeCache = require('node-cache')
-const fetch = require('node-fetch')
+const optimizelySDK = require("@optimizely/optimizely-sdk");
+const NodeCache = require("node-cache");
+const fetch = require("node-fetch");
 
-const cache = new NodeCache()
-const cdnUrl = 'https://cdn.optimizely.com'
+const cache = new NodeCache();
+const cdnUrl = "https://cdn.optimizely.com";
 
 // optimizelySDK.setLogLevel('info')
-optimizelySDK.setLogger(optimizelySDK.logging.createLogger())
+optimizelySDK.setLogger(optimizelySDK.logging.createLogger());
 
 /**
  * Optimizely class for doing all the logic things
  */
 module.exports = class Optimizely {
-  constructor (sdkKey) {
-    this.sdkKey = sdkKey
-    this.client = null
-    this.parsed = null // parsed data file
-    this.datafile = null // raw json datafile
+  constructor(sdkKey) {
+    this.sdkKey = sdkKey;
+    this.client = null;
+    this.parsed = null; // parsed data file
+    this.datafile = null; // raw json datafile
   }
 
   /**
@@ -24,16 +24,16 @@ module.exports = class Optimizely {
    *
    * @return {OptimizelySDK}
    */
-  async createClient () {
-    const datafile = await this.getDataFile()
+  async createClient() {
+    const datafile = await this.getDataFile();
     return optimizelySDK.createInstance({
       datafile,
       sdkKey: this.sdkKey,
       datafileOptions: {
         autoUpdate: true,
-        updateInterval: 1000 // 1 second in milliseconds
-      }
-    })
+        updateInterval: 1000, // 1 second in milliseconds
+      },
+    });
   }
 
   /**
@@ -41,10 +41,10 @@ module.exports = class Optimizely {
    *
    * @return {Array}
    */
-  async getFeatureFlagsList () {
-    const datafile = await this.getParsedDataFile()
+  async getFeatureFlagsList() {
+    const datafile = await this.getParsedDataFile();
     if (datafile.featureFlags && datafile.featureFlags.length > 0) {
-      return datafile.featureFlags.map(ff => ff.key)
+      return datafile.featureFlags.map((ff) => ff.key);
     }
   }
 
@@ -55,17 +55,17 @@ module.exports = class Optimizely {
    *
    * @return {Object}
    */
-  async getFeatureFlagsEnabled (userId, attributes = {}) {
-    const featureFlags = await this.getFeatureFlagsList()
-    const enabled = {}
-    for (var i = 0; i < featureFlags.length; i++) {
+  async getFeatureFlagsEnabled(userId, attributes = {}) {
+    const featureFlags = await this.getFeatureFlagsList();
+    const enabled = {};
+    for (let i = 0; i < featureFlags.length; i++) {
       enabled[featureFlags[i]] = await this.isFeatureEnabled(
         featureFlags[i],
         userId,
         attributes
-      )
+      );
     }
-    return enabled
+    return enabled;
   }
 
   /**
@@ -73,12 +73,12 @@ module.exports = class Optimizely {
    *
    * @return {OptimizelySDK}
    */
-  async getClient () {
+  async getClient() {
     if (this.client !== null) {
-      return this.client
+      return this.client;
     } else {
-      this.client = await this.createClient()
-      return this.client
+      this.client = await this.createClient();
+      return this.client;
     }
   }
 
@@ -87,20 +87,20 @@ module.exports = class Optimizely {
    *
    * @return {Object}
    */
-  async getParsedDataFile () {
+  async getParsedDataFile() {
     if (this.parsed !== null) {
-      return this.parsed
+      return this.parsed;
     }
-    const file = await this.getDataFile()
-    let data = null
+    const file = await this.getDataFile();
+    let data = null;
     try {
-      data = JSON.parse(file)
+      data = JSON.parse(file);
     } catch (e) {
       // I guess it is already parsed?
-      data = file
+      data = file;
     }
-    this.parsed = data
-    return this.parsed
+    this.parsed = data;
+    return this.parsed;
   }
 
   /**
@@ -110,18 +110,18 @@ module.exports = class Optimizely {
    *
    * @return {Object}
    */
-  async validateAttributes (attributes) {
-    const datafile = await this.getParsedDataFile()
+  async validateAttributes(attributes) {
+    const datafile = await this.getParsedDataFile();
     if (!datafile.attributes || datafile.attributes.length === 0) {
-      return {}
+      return {};
     }
-    const validated = {}
-    datafile.attributes.forEach(attr => {
+    const validated = {};
+    datafile.attributes.forEach((attr) => {
       if (attributes[attr.key]) {
-        validated[attr.key] = attributes[attr.key]
+        validated[attr.key] = attributes[attr.key];
       }
-    })
-    return validated
+    });
+    return validated;
   }
 
   /**
@@ -132,10 +132,10 @@ module.exports = class Optimizely {
    *
    * @return {boolean}
    */
-  async isFeatureEnabled (feature, userId, attributes = {}) {
-    const client = await this.getClient()
-    const attrs = await this.validateAttributes(attributes)
-    return client.isFeatureEnabled(feature, userId, attrs)
+  async isFeatureEnabled(feature, userId, attributes = {}) {
+    const client = await this.getClient();
+    const attrs = await this.validateAttributes(attributes);
+    return client.isFeatureEnabled(feature, userId, attrs);
   }
 
   /**
@@ -143,14 +143,14 @@ module.exports = class Optimizely {
    *
    * @return {String}
    */
-  async cacheDataFile () {
-    const response = await fetch(`${cdnUrl}/datafiles/${this.sdkKey}.json`)
-    const dataFile = await response.json()
+  async cacheDataFile() {
+    const response = await fetch(`${cdnUrl}/datafiles/${this.sdkKey}.json`);
+    const dataFile = await response.json();
     if (!dataFile) {
-      return null
+      return null;
     }
-    cache.set(this.sdkKey, dataFile)
-    return dataFile
+    cache.set(this.sdkKey, dataFile);
+    return dataFile;
   }
 
   /**
@@ -158,14 +158,14 @@ module.exports = class Optimizely {
    *
    * @return {String}
    */
-  async getDataFile () {
+  async getDataFile() {
     if (this.datafile !== null) {
-      return this.datafile
+      return this.datafile;
     }
-    this.datafile = cache.get(this.sdkKey)
+    this.datafile = cache.get(this.sdkKey);
     if (this.datafile === undefined) {
-      this.datafile = await this.cacheDataFile()
+      this.datafile = await this.cacheDataFile();
     }
-    return this.datafile
+    return this.datafile;
   }
-}
+};
