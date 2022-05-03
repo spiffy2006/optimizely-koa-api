@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "npm test",
-    "watch:dev": "nodemon api/index.js"
+    "lint": "prettier -c **/*.js",
+    "watch:dev": "nodemon api/index.js",
+    "prepare": "husky install"
   },
   "author": "",
   "license": "ISC",
@@ -13,33 +15,25 @@
     "@koa/cors": "^3.1.0",
     "@koa/router": "^8.0.8",
     "@optimizely/optimizely-sdk": "^3.5.0",
-    "koa": "^2.13.0",
+    "koa": "^2.13.4",
     "koa-bodyparser": "^4.3.0",
     "koa-logger": "^3.2.1",
     "node-cache": "^4.2.1",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^3.2.4"
   },
   "devDependencies": {
-    "babel-eslint": "^10.1.0",
-    "husky": "^3.1.0",
-    "lint-staged": "^9.5.0",
-    "nodemon": "^1.19.4",
-    "prettier": "^1.19.1",
-    "standard": "^14.3.4"
-  },
-  "standard": {
-    "parser": "babel-eslint"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
+    "husky": "^7.0.4",
+    "lint-staged": "^12.4.1",
+    "nodemon": "^2.0.16",
+    "prettier": "^2.6.2"
   },
   "lint-staged": {
     "*.js": [
       "prettier --write",
-      "standard --fix",
       "git add"
     ]
+  },
+  "engines": {
+    "node": "^16"
   }
 }
